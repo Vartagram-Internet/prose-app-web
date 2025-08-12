@@ -25,7 +25,7 @@
       class="a-start-login-form__field"
       type="email"
       name="jid"
-      placeholder="Enter your Prose address…"
+      placeholder="Enter your User Id"
       size="ultra-large"
       autofocus
     )
@@ -48,7 +48,7 @@
       size="ultra-large"
       type="submit"
     )
-      | Login to your Prose account
+      | Login to your Riply account
 
     .a-start-login-form__options
       .a-start-login-form__options-left

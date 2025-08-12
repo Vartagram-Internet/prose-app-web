@@ -20,7 +20,7 @@ type InlineData = string;
 
 class BuilderInline {
   scripts(isApplication = false): InlineDataItems {
-    // Notice: enable loader video only if not a Tauri application build, \
+    // Notice: enable loader text only if not a Tauri application build, \
     //   meaning only for Web browser targets where resources are being pulled \
     //   from a remote server and therefore some wait is induced.
     return {
@@ -34,7 +34,7 @@ class BuilderInline {
     };
   }
 
-  private __scriptLoader(withVideo = true): InlineData {
+  private __scriptLoader(withText = true): InlineData {
     return this.__wrapScriptClosure(`
       let theme;
 
@@ -69,41 +69,15 @@ class BuilderInline {
         // Apply detected theme to loader
         loaderElement.classList.add(\`loader--\${theme}\`);
 
-        // Create loader video?
-        if (${withVideo}) {
-          const videoElement = document.createElement("video");
+        // Create loader text?
+        if (${withText}) {
+          const textElement = document.createElement("div");
+          
+          textElement.className = "loader-text";
+          textElement.textContent = "Riply";
 
-          videoElement.height = 80;
-          videoElement.width = 200;
-          videoElement.autoplay = true;
-          videoElement.loop = true;
-          videoElement.muted = true;
-
-          // Append video sources (in priority order, most efficient first)
-          const videoSources = [
-            ["av1", "webm"],
-            ["vp9", "webm"],
-            ["hvc1", "mp4"]
-          ];
-
-          videoSources.forEach(videoSource => {
-            const sourceElement = document.createElement("source");
-
-            sourceElement.src = [
-              \`/videos/loader/\${theme}\`,
-              \`logo-\${videoSource[0]}.\${videoSource[1]}\`
-            ].join("/");
-
-            sourceElement.type = [
-              \`video/\${videoSource[1]}\`,
-              \`codecs=\${videoSource[0]}\`
-            ].join("; ");
-
-            videoElement.appendChild(sourceElement);
-          });
-
-          // Append loader video
-          loaderElement.appendChild(videoElement);
+          // Append loader text
+          loaderElement.appendChild(textElement);
         }
       };
 
@@ -150,6 +124,9 @@ class BuilderInline {
       #loader {
         position: fixed;
         inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #loader.loader--light {
@@ -160,10 +137,31 @@ class BuilderInline {
         background-color: #000;
       }
 
-      #loader video {
-        position: absolute;
-        inset: 50%;
-        transform: translate(-50%, -50%);
+      #loader .loader-text {
+        font-size: 3rem;
+        font-weight: bold;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        letter-spacing: 0.1em;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      #loader.loader--light .loader-text {
+        color: #333;
+      }
+
+      #loader.loader--dark .loader-text {
+        color: #fff;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.05);
+        }
       }
     `;
   }

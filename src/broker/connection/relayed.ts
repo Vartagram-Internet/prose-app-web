@@ -353,7 +353,7 @@ class BrokerConnectionRelayedStrophe
 
     // #3. Generate default URL (fallback)
     const relayHost: RelayHost = {
-      url: `wss://${domain}/websocket/`,
+      url: `wss://${domain}:5443/ws/`,
       protocol: "wss"
     };
 
