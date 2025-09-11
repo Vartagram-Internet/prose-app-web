@@ -76,8 +76,6 @@ type ProfileEntrySecurityVerification = {
 };
 
 type ProfileEntrySecurityEncryption = {
-  secureProtocol?: boolean;
-  connectionProtocol?: string;
   messageEndToEndMethod?: string;
 };
 
@@ -332,8 +330,6 @@ const $profile = defineStore("profile", {
 
           if (metadata.encryption) {
             profile.security.encryption = {
-              secureProtocol: metadata.encryption.secureProtocol,
-              connectionProtocol: metadata.encryption.connectionProtocol,
               messageEndToEndMethod: metadata.encryption.messageEndToEndMethod
             };
           } else {

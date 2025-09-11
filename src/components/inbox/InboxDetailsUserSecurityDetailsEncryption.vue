@@ -35,6 +35,9 @@ import { JID, Room } from "@prose-im/prose-sdk-js";
 // PROJECT: COMPONENTS
 import { Detail as BadgeDetail } from "@/components/base/BaseBadgeDetails.vue";
 
+// PROJECT: COMMONS
+import CONFIG from "@/commons/config";
+
 // PROJECT: STORES
 import Store from "@/store";
 import { ProfileEntrySecurityEncryption } from "@/store/tables/profile";
@@ -73,7 +76,7 @@ export default {
       const details = [];
 
       // Append client-to-server encryption status
-      if (!encryption.connectionProtocol) {
+      if (Store.$session.connected !== true) {
         details.push({
           icon: "key.fill",
           color: "orange",
@@ -81,11 +84,11 @@ export default {
           label:
             "Security of sent messages cannot be guaranteed at the moment, as you are not connected to your server."
         });
-      } else if (!encryption.secureProtocol) {
+      } else if (CONFIG.overrides?.allowInsecure === true) {
         details.push({
           icon: "key.fill",
           color: "red",
-          title: `Connected to server with no encryption (via ${encryption.connectionProtocol})`,
+          title: "Connected to server with no encryption",
           label:
             "This is very insecure! Anyone tapping the network can see everything you send and receive."
         });
@@ -93,7 +96,7 @@ export default {
         details.push({
           icon: "key.fill",
           color: "green",
-          title: `Connected to server over ${encryption.connectionProtocol}`,
+          title: "Connected to server over secure connection",
           label:
             "Someone tapping the network will not be able to read what is sent. Perfect!"
         });

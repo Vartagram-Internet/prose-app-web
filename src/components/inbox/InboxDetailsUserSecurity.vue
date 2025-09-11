@@ -89,6 +89,9 @@ import { JID, Room } from "@prose-im/prose-sdk-js";
 import InboxDetailsUserSecurityDetailsIdentity from "@/components/inbox/InboxDetailsUserSecurityDetailsIdentity.vue";
 import InboxDetailsUserSecurityDetailsEncryption from "@/components/inbox/InboxDetailsUserSecurityDetailsEncryption.vue";
 
+// PROJECT: COMMONS
+import CONFIG from "@/commons/config";
+
 // PROJECT: STORES
 import Store from "@/store";
 
@@ -142,29 +145,30 @@ export default {
     entries(): Array<Entry> {
       const entries = [];
 
-      if (this.profile.security) {
-        if (this.profile.security.verification) {
-          entries.push({
-            id: "identity",
-            kind: "verified",
-            title: "Identity verified",
-            icon: "checkmark.seal.fill"
-          });
-        } else {
-          entries.push({
-            id: "identity",
-            kind: "unknown",
-            title: "Identity unverified",
-            icon: "xmark.seal.fill"
-          });
-        }
+      if (this.profile.security?.verification) {
+        entries.push({
+          id: "identity",
+          kind: "verified",
+          title: "Identity verified",
+          icon: "checkmark.seal.fill"
+        });
+      } else if (this.jid.domain === this.selfJID.domain) {
+        entries.push({
+          id: "identity",
+          kind: "trusted",
+          title: "Identity trusted",
+          icon: "checkmark.seal.fill"
+        });
+      } else {
+        entries.push({
+          id: "identity",
+          kind: "unknown",
+          title: "Identity unverified",
+          icon: "xmark.seal.fill"
+        });
       }
 
-      if (
-        !this.profile.security ||
-        !this.profile.security.encryption ||
-        !this.profile.security.encryption.connectionProtocol
-      ) {
+      if (this.session.connected !== true) {
         // No connection available (might be insecure?)
         entries.push({
           id: "encryption",
@@ -173,7 +177,7 @@ export default {
           icon: "exclamationmark.lock.fill",
           important: true
         });
-      } else if (!this.profile.security.encryption.secureProtocol) {
+      } else if (CONFIG.overrides?.allowInsecure === true) {
         // No encryption whatsoever (insecure!)
         entries.push({
           id: "encryption",
@@ -182,8 +186,14 @@ export default {
           icon: "lock.slash.fill",
           critical: true
         });
-      } else if (!this.profile.security.encryption.messageEndToEndMethod) {
+      } else if (!this.profile.security?.encryption?.messageEndToEndMethod) {
         // Okay-level of encryption (C2S)
+        // Prose does not allow insecure protocols, therefore we can mark \
+        //   the connection as secure here.
+        // Important: UNLESS the 'allow insecure' override is NOT toggled \
+        //   on, we mark all connections as non-secure by default. If this \
+        //   override is not set, then all connections are GUARANTEED to \
+        //   be secure.
         entries.push({
           id: "encryption",
           kind: "safe",
@@ -205,8 +215,20 @@ export default {
       return entries;
     },
 
+    selfJID(): JID {
+      return this.account.getSelfJID();
+    },
+
     profile(): ReturnType<typeof Store.$profile.getProfile> {
       return Store.$profile.getProfile(this.jid);
+    },
+
+    account(): typeof Store.$account {
+      return Store.$account;
+    },
+
+    session(): typeof Store.$session {
+      return Store.$session;
     }
   },
 
@@ -263,6 +285,10 @@ $c: ".c-inbox-details-user-security";
   #{$c}__icon {
     &--identity-verified {
       fill: rgb(var(--color-base-green-normal));
+    }
+
+    &--identity-trusted {
+      fill: rgb(var(--color-base-blue-normal));
     }
 
     &--identity-unknown {
